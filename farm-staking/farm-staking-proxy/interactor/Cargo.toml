@@ -1,0 +1,33 @@
+[package]
+name = "farm-staking-proxy-interactor"
+version = "0.0.0"
+authors = ["you"]
+edition = "2021"
+publish = false
+
+[[bin]]
+name = "farm-staking-proxy-interactor"
+path = "src/interactor_main.rs"
+
+[lib]
+path = "src/interact.rs"
+
+[dependencies.farm-staking-proxy]
+path = ".."
+
+[dependencies.multiversx-sc-snippets]
+version = "0.55.0"
+
+[dependencies.multiversx-sc]
+version = "0.55.0"
+
+[dependencies.proxies]
+path = "./proxies"
+
+[dependencies]
+clap = { version = "4.4.7", features = ["derive"] }
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.8.6"
+
+[features]
+chain-simulator-tests = []

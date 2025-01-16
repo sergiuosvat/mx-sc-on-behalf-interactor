@@ -1,0 +1,22 @@
+[package]
+name = "proxies"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies.multiversx-sc]
+version = "0.55.0"
+
+[dependencies.common_structs]
+path = "../../../../common/common_structs"
+
+[dependencies.pausable]
+path = "../../../../common/modules/pausable"
+
+[dependencies.energy-query]
+path = "../../../../energy-integration/common-modules/energy-query"
+
+[dependencies.weekly-rewards-splitting]
+path = "../../../../energy-integration/common-modules/weekly-rewards-splitting"
+
+[dependencies.farm-boosted-yields]
+path = "../../../../energy-integration/farm-boosted-yields"
