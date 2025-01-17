@@ -20,7 +20,7 @@ pub trait FarmTokenModule:
     ) {
         self.require_caller_has_owner_or_admin_permissions();
 
-        let payment_amount = self.call_value().egld_value().clone_value();
+        let payment_amount = self.call_value().egld().clone_value();
         self.farm_token().issue_and_set_all_roles(
             EsdtTokenType::Meta,
             payment_amount,
@@ -29,12 +29,6 @@ pub trait FarmTokenModule:
             num_decimals,
             None,
         );
-    }
-
-    #[endpoint(setFarmTokenId)]
-    fn set_farm_token_id(&self, token_id: TokenIdentifier) {
-        self.require_caller_has_owner_or_admin_permissions();
-        self.farm_token().set_token_id(token_id);
     }
 
     fn burn_farm_tokens_from_payments(&self, payments: &ManagedVec<EsdtTokenPayment<Self::Api>>) {

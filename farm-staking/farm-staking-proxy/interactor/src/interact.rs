@@ -895,32 +895,22 @@ impl ContractInteract {
             .await
     }
 
-    pub async fn set_special_roles_lp_farm(
-        &mut self,
-        farm_token: String,
-        farming_token: String,
-        rewards_token: String,
-    ) {
-        let farming_token_roles = [
-            EsdtLocalRole::NftCreate,
-            EsdtLocalRole::NftAddQuantity,
-            EsdtLocalRole::NftBurn,
-        ];
+    pub async fn register_farm_token(&mut self) {
+        let issue_cost = BigUint::<StaticApi>::from(50000000000000000u64);
         self.interactor
             .tx()
-            .from(self.wallet_address.clone())
-            .to(ESDTSystemSCAddress)
+            .from(&self.wallet_address)
+            .to(self.state.current_lp_farm_address())
             .gas(100_000_000u64)
-            .typed(ESDTSystemSCProxy)
-            .set_special_roles(
-                self.state.current_lp_farm_address().clone(),
-                TokenIdentifier::from_esdt_bytes(farming_token),
-                farming_token_roles.into_iter(),
-            )
+            .typed(farm_with_locked_rewards_proxy::FarmProxy)
+            .register_farm_token("LPFarming", "LPF", 18u8)
+            .egld(issue_cost)
             .returns(ReturnsResultUnmanaged)
             .run()
             .await;
+    }
 
+    pub async fn set_special_roles_lp_farm(&mut self, farm_token: String, rewards_token: String) {
         let farm_token_roles = [EsdtLocalRole::Burn];
         self.interactor
             .tx()
@@ -1047,46 +1037,21 @@ impl ContractInteract {
 
     pub async fn enter_farm_endpoint(&mut self, token_id: String, amount: u64) {
         let original_caller: OptionalValue<[u8; 32]> = OptionalValue::None;
-        let mut payments = MultiEsdtPayment::new();
-        payments.push(EsdtTokenPayment::new(
-            TokenIdentifier::from_esdt_bytes(token_id.clone()),
-            0,
-            BigUint::from(amount),
-        ));
-        let response = self
-            .interactor
+        self.interactor
             .tx()
             .from(&self.wallet_address)
             .to(self.state.current_lp_farm_address())
             .gas(30_000_000u64)
             .typed(farm_with_locked_rewards_proxy::FarmProxy)
             .enter_farm_endpoint(original_caller)
-            .payment(payments)
+            .esdt(EsdtTokenPayment::new(
+                TokenIdentifier::from_esdt_bytes(token_id),
+                0,
+                amount.into(),
+            ))
             .returns(ReturnsResultUnmanaged)
             .run()
             .await;
-
-        let (new_farm_token, _) = response.into_tuple();
-        assert_eq!(
-            new_farm_token.token_identifier,
-            TokenIdentifier::from_esdt_bytes(token_id)
-        );
-    }
-
-    pub async fn set_lp_farm_token(&mut self, token_id: String) {
-        let response = self
-            .interactor
-            .tx()
-            .from(&self.wallet_address)
-            .to(self.state.current_lp_farm_address())
-            .gas(30_000_000u64)
-            .typed(farm_with_locked_rewards_proxy::FarmProxy)
-            .set_farm_token_id(TokenIdentifier::from_esdt_bytes(token_id))
-            .returns(ReturnsResultUnmanaged)
-            .run()
-            .await;
-
-        println!("Result: {response:?}");
     }
 
     pub async fn set_minimum_farming_epochs(&mut self, epochs: u64) {
@@ -1304,22 +1269,18 @@ impl ContractInteract {
             .await;
     }
 
-    pub async fn get_farming_token_id(&mut self) {
-        let result_value = self
-            .interactor
+    pub async fn get_farm_token_id(&mut self) -> TokenIdentifier<StaticApi> {
+        self.interactor
             .query()
             .to(self.state.current_lp_farm_address())
             .typed(farm_with_locked_rewards_proxy::FarmProxy)
-            .farming_token_id()
+            .farm_token()
             .returns(ReturnsResultUnmanaged)
             .run()
-            .await;
-
-        println!("{:?}", result_value);
+            .await
     }
 
-    pub async fn setup_lp_farm(&mut self, token_id: String) {
-        self.set_lp_farm_token(token_id).await;
+    pub async fn setup_lp_farm(&mut self) {
         self.set_minimum_farming_epochs(MIN_FARMING_EPOCHS).await;
         self.set_penalty_percent(PENALTY_PERCENTAGE).await;
         self.set_active_state_lp().await;
@@ -1387,28 +1348,23 @@ impl ContractInteract {
                 18,
             )
             .await;
-        let LP_FARM = self
-            .issue_and_set_all_roles(
-                self.wallet_address.clone(),
-                "LPFARM".as_bytes(),
-                "LPF".as_bytes(),
-            )
-            .await;
         self.deploy_energy_factory_mock().await;
         self.deploy_pair(WEGLD.clone(), RIDE.clone(), LP.clone())
             .await;
         self.deploy_farm_with_locked_rewards(LP.clone(), MEX.clone())
             .await;
-        self.set_special_roles_lp_farm(LP.clone(), LP_FARM.clone(), RIDE.clone())
+        self.register_farm_token().await;
+        let LP_FARM = self.get_farm_token_id().await;
+        self.set_special_roles_lp_farm(LP.clone(), RIDE.clone())
             .await;
-        self.setup_lp_farm(LP_FARM.clone()).await;
+        self.setup_lp_farm().await;
         self.deploy_farm_staking(RIDE.clone()).await;
         self.setup_farm_staking(STAKING_FARM.clone()).await;
         self.deploy_metastaking(
             RIDE.clone(),
             LP.clone(),
             STAKING_FARM.clone(),
-            LP_FARM.clone(),
+            LP_FARM.to_string(),
         )
         .await;
         self.deploy_permission_hub().await;
@@ -1416,14 +1372,8 @@ impl ContractInteract {
         self.send_tokens_to_other_wallet(self.bob_address.clone(), LP.clone(), 1u64)
             .await;
         self.set_permissions_hub_address().await;
-        let result = self
-            .interactor
-            .proxy
-            .get_account_esdt_tokens(&self.wallet_address)
-            .await;
-        println!("User balance: {:?}", result);
 
-        (LP, LP_FARM)
+        (LP, LP_FARM.to_string())
     }
     pub async fn set_boosted_yields_rewards_percentage(&mut self, percentage_wanted: u64) {
         let response = self

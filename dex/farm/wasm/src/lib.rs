@@ -6,9 +6,9 @@
 
 // Init:                                 1
 // Upgrade:                              1
-// Endpoints:                           67
+// Endpoints:                           66
 // Async Callback:                       1
-// Total number of exported functions:  70
+// Total number of exported functions:  69
 
 #![no_std]
 
@@ -42,7 +42,6 @@ multiversx_sc_wasm_adapter::endpoints! {
         getAllowExternalClaim => allow_external_claim
         getFarmPositionMigrationNonce => farm_position_migration_nonce
         registerFarmToken => register_farm_token
-        setFarmTokenId => set_farm_token_id
         getFarmTokenId => farm_token
         getFarmTokenSupply => farm_token_supply
         addToPauseWhitelist => add_to_pause_whitelist

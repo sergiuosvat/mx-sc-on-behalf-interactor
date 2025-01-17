@@ -11,7 +11,8 @@ const BOOSTED_YIELDS_PERCENTAGE: u64 = 2500;
 #[cfg_attr(not(feature = "chain-simulator-tests"), ignore)]
 async fn test_deploy() {
     let mut interactor = ContractInteract::new().await;
-    interactor.setup_tests().await;
+    let (_, lp_farm) = interactor.setup_tests().await;
+    println!("LP_FARM: {:?}", lp_farm);
     interactor
         .set_boosted_yields_rewards_percentage_lp(BOOSTED_YIELDS_PERCENTAGE)
         .await;

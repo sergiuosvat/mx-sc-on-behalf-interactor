@@ -6,9 +6,9 @@
 
 // Init:                                 1
 // Upgrade:                              1
-// Endpoints:                           70
+// Endpoints:                           69
 // Async Callback:                       1
-// Total number of exported functions:  73
+// Total number of exported functions:  72
 
 #![no_std]
 
@@ -45,7 +45,6 @@ multiversx_sc_wasm_adapter::endpoints! {
         getLockingScAddress => locking_sc_address
         getLockEpochs => lock_epochs
         registerFarmToken => register_farm_token
-        setFarmTokenId => set_farm_token_id
         getFarmTokenId => farm_token
         getFarmTokenSupply => farm_token_supply
         addToPauseWhitelist => add_to_pause_whitelist

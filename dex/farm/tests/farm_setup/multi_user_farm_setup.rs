@@ -5,9 +5,7 @@ use common_structs::FarmTokenAttributes;
 use config::ConfigModule;
 use farm::external_interaction::ExternalInteractionsModule;
 use multiversx_sc::codec::multi_types::OptionalValue;
-use multiversx_sc::{
-    types::{Address, BigInt, EsdtLocalRole, MultiValueEncoded},
-};
+use multiversx_sc::types::{Address, BigInt, EsdtLocalRole, MultiValueEncoded};
 use multiversx_sc_scenario::whitebox_legacy::TxTokenTransfer;
 use multiversx_sc_scenario::{
     managed_address, managed_biguint, managed_token_id, rust_biguint,
@@ -239,7 +237,7 @@ where
                 &self.energy_factory_wrapper,
                 &rust_biguint!(0),
                 |sc| {
-                    sc.user_energy(&managed_address!(user)).set(&Energy::new(
+                    sc.user_energy(&managed_address!(user)).set(Energy::new(
                         BigInt::from(managed_biguint!(energy)),
                         last_update_epoch,
                         managed_biguint!(locked_tokens),
