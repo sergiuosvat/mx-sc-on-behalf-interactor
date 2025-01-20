@@ -478,7 +478,6 @@ where
                     let (unbond_farm_tokens, reward_tokens) =
                         sc.unstake_farm(OptionalValue::None).into_tuple();
                     unbond_token_nonce = unbond_farm_tokens.token_nonce;
-
                     assert_eq!(reward_tokens.amount, expected_rewards_amount);
                     assert_eq!(
                         unbond_farm_tokens.amount,

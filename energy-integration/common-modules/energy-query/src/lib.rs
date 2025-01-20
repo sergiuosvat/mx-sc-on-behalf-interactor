@@ -58,6 +58,7 @@ pub trait EnergyQueryModule {
         ))
     }
 
+    #[endpoint(getLockedTokenIdTest)]
     fn get_locked_token_id(&self) -> TokenIdentifier {
         self.read_raw_storage_from_energy_factory(ManagedBuffer::new_from_bytes(
             LOCKED_TOKEN_ID_STORAGE_KEY,

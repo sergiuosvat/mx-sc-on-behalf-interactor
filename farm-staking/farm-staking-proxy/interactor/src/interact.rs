@@ -14,13 +14,15 @@ use std::{
 const STATE_FILE: &str = "state.toml";
 const PAIR_CONTRACT_CODE: &str = "../../dex/pair-mock/output/pair-mock.mxsc.json";
 const ENERGY_FACTORY_CONTRACT_CODE: &str =
-    "../../energy-integration/energy-factory-mock/output/energy-factory-mock.mxsc.json";
+    "../../locked-asset/energy-factory/output/energy-factory.mxsc.json";
 const LP_FARM_CONTRACT_CODE: &str =
     "../../dex/farm-with-locked-rewards/output/farm-with-locked-rewards.mxsc.json";
 const FARM_STAKING_CONTRACT_CODE: &str = "../farm-staking/output/farm-staking.mxsc.json";
 const CONTRACT_CODE: &str = "output/farm-staking-proxy.mxsc.json";
 const PERMISSION_HUB_CONTRACT_CODE: &str =
     "../../dex/permissions-hub/output/permissions-hub.mxsc.json";
+const ENERGY_FACTORY_MOCK_CONTRACT_CODE: &str =
+    "../../energy-integration/energy-factory-mock/output/energy-factory-mock.mxsc.json";
 const MIN_FARMING_EPOCHS: u64 = 2;
 const PENALTY_PERCENTAGE: u64 = 10;
 const LP_FARM_PER_BLOCK_REWARD_AMOUNT: u64 = 5_000;
@@ -32,7 +34,9 @@ const USER_REWARDS_ENERGY_CONST: u64 = 3;
 const USER_REWARDS_FARM_CONST: u64 = 2;
 const MIN_ENERGY_AMOUNT_FOR_BOOSTED_YIELDS: u64 = 1;
 const MIN_FARM_AMOUNT_FOR_BOOSTED_YIELDS: u64 = 1;
-
+const PENALTY_PERCENTAGES: &[u64] = &[4_000, 6_000, 8_000];
+const LEGACY_LOCKED_TOKEN_ID: &[u8] = b"LEGACY-123456";
+const BASE_ASSET_TOKEN_ID: &[u8] = b"BASST-123456";
 pub async fn farm_staking_proxy_cli() {
     env_logger::init();
 
@@ -79,6 +83,7 @@ pub struct State {
     lp_farm_address: Option<Bech32Address>,
     farm_staking_address: Option<Bech32Address>,
     permission_hub_address: Option<Bech32Address>,
+    energy_factory_mock_address: Option<Bech32Address>,
 }
 
 impl State {
@@ -119,6 +124,10 @@ impl State {
         self.permission_hub_address = Some(address);
     }
 
+    pub fn set_energy_factory_mock_address(&mut self, address: Bech32Address) {
+        self.energy_factory_mock_address = Some(address);
+    }
+
     /// Returns the contract address
     pub fn current_address(&self) -> &Bech32Address {
         self.contract_address
@@ -155,6 +164,12 @@ impl State {
             .as_ref()
             .expect("no known permission hub address, deploy first")
     }
+
+    pub fn current_energy_factory_mock_address(&self) -> &Bech32Address {
+        self.energy_factory_mock_address
+            .as_ref()
+            .expect("no known energy factory mock address, deploy first")
+    }
 }
 
 impl Drop for State {
@@ -173,6 +188,7 @@ pub struct ContractInteract {
     contract_code: String,
     pair_contract_code: String,
     energy_factory_contract_code: String,
+    energy_factory_mock_contract_code: String,
     lp_farm_contract_code: String,
     farm_staking_contract_code: String,
     permission_hub_contract_code: String,
@@ -201,6 +217,7 @@ impl ContractInteract {
             contract_code: CONTRACT_CODE.to_string(),
             pair_contract_code: PAIR_CONTRACT_CODE.to_string(),
             energy_factory_contract_code: ENERGY_FACTORY_CONTRACT_CODE.to_string(),
+            energy_factory_mock_contract_code: ENERGY_FACTORY_MOCK_CONTRACT_CODE.to_string(),
             lp_farm_contract_code: LP_FARM_CONTRACT_CODE.to_string(),
             farm_staking_contract_code: FARM_STAKING_CONTRACT_CODE.to_string(),
             permission_hub_contract_code: PERMISSION_HUB_CONTRACT_CODE.to_string(),
@@ -292,8 +309,7 @@ impl ContractInteract {
     }
 
     pub async fn deploy_energy_factory_mock(&mut self) {
-        let code_path = MxscPath::new(&self.energy_factory_contract_code);
-
+        let code_path = MxscPath::new(&self.energy_factory_mock_contract_code);
         let new_address = self
             .interactor
             .tx()
@@ -307,11 +323,55 @@ impl ContractInteract {
             .await;
         let new_address_bech32 = bech32::encode(&new_address);
         self.state
+            .set_energy_factory_mock_address(Bech32Address::from_bech32_string(
+                new_address_bech32.clone(),
+            ));
+
+        println!("new address: {new_address_bech32}");
+    }
+
+    pub async fn deploy_energy_factory(&mut self) {
+        let code_path = MxscPath::new(&self.energy_factory_contract_code);
+        let mut lock_options = MultiValueEncoded::new();
+        for (option, penalty) in LOCK_OPTIONS.iter().zip(PENALTY_PERCENTAGES.iter()) {
+            lock_options.push((*option, *penalty).into());
+        }
+        let old_locked_address = self.state.current_energy_factory_mock_address();
+        let new_address = self
+            .interactor
+            .tx()
+            .from(&self.wallet_address)
+            .gas(160_000_000u64)
+            .typed(energy_factory_proxy::SimpleLockEnergyProxy)
+            .init(
+                TokenIdentifier::from_esdt_bytes(BASE_ASSET_TOKEN_ID.to_vec()),
+                TokenIdentifier::from_esdt_bytes(LEGACY_LOCKED_TOKEN_ID.to_vec()),
+                old_locked_address,
+                0u64,
+                lock_options,
+            )
+            .code(code_path)
+            .returns(ReturnsNewAddress)
+            .run()
+            .await;
+        let new_address_bech32 = bech32::encode(&new_address);
+        self.state
             .set_energy_factory_address(Bech32Address::from_bech32_string(
                 new_address_bech32.clone(),
             ));
 
         println!("new address: {new_address_bech32}");
+
+        self.interactor
+            .tx()
+            .from(&self.wallet_address)
+            .to(self.state.current_energy_factory_address())
+            .gas(30_000_000u64)
+            .typed(energy_factory_proxy::SimpleLockEnergyProxy)
+            .unpause_endpoint()
+            .returns(ReturnsResultUnmanaged)
+            .run()
+            .await;
     }
 
     pub async fn deploy_farm_with_locked_rewards(
@@ -1049,7 +1109,7 @@ impl ContractInteract {
                 0,
                 amount.into(),
             ))
-            .returns(ReturnsResultUnmanaged)
+            .returns(ReturnsResult)
             .run()
             .await;
     }
@@ -1198,14 +1258,16 @@ impl ContractInteract {
             .await;
     }
 
-    pub async fn set_farm_token_farm_staking(&mut self, token_id: String) {
+    pub async fn register_farm_token_farm_staking(&mut self) {
+        let issue_cost = BigUint::<StaticApi>::from(50000000000000000u64);
         self.interactor
             .tx()
             .from(&self.wallet_address)
             .to(self.state.current_farm_staking_address())
-            .gas(30_000_000u64)
+            .gas(90_000_000u64)
             .typed(farm_staking_proxy::FarmStakingProxy)
-            .set_farm_token_id(TokenIdentifier::from_esdt_bytes(token_id))
+            .register_farm_token("StakingFarm", "STKF", 18u8)
+            .egld(issue_cost)
             .returns(ReturnsResultUnmanaged)
             .run()
             .await;
@@ -1280,7 +1342,79 @@ impl ContractInteract {
             .await
     }
 
+    pub async fn get_farm_token_id_staking(&mut self) -> TokenIdentifier<StaticApi> {
+        self.interactor
+            .query()
+            .to(self.state.current_farm_staking_address())
+            .typed(farm_staking_proxy::FarmStakingProxy)
+            .farm_token()
+            .returns(ReturnsResultUnmanaged)
+            .run()
+            .await
+    }
+
+    pub async fn issue_locked_token(&mut self) -> TokenIdentifier<StaticApi> {
+        let issue_cost = BigUint::<StaticApi>::from(50000000000000000u64);
+        self.interactor
+            .tx()
+            .from(&self.wallet_address)
+            .to(self.state.current_energy_factory_address())
+            .gas(90_000_000u64)
+            .typed(energy_factory_proxy::SimpleLockEnergyProxy)
+            .issue_locked_token("LockedToken", "LCKD", 18u8)
+            .egld(issue_cost)
+            .returns(ReturnsResultUnmanaged)
+            .run()
+            .await;
+
+        self.interactor
+            .query()
+            .to(self.state.current_energy_factory_address())
+            .typed(energy_factory_proxy::SimpleLockEnergyProxy)
+            .locked_token()
+            .returns(ReturnsResultUnmanaged)
+            .run()
+            .await
+    }
+
+    pub async fn get_locked_token_id_wanted(&mut self) -> TokenIdentifier<StaticApi> {
+        self.interactor
+            .query()
+            .to(self.state.current_lp_farm_address())
+            .typed(farm_with_locked_rewards_proxy::FarmProxy)
+            .get_locked_token_id()
+            .returns(ReturnsResultUnmanaged)
+            .run()
+            .await
+    }
+
+    pub async fn get_storage_keys_energy_factory(&mut self) {
+        let result = self
+            .interactor
+            .proxy
+            .get_account_storage_keys(&self.state.current_energy_factory_address().to_address())
+            .await;
+        println!("Storage keys: {:?}", result);
+    }
+
+    pub async fn get_energy_factory_address_lp(&mut self) {
+        let result = self
+            .interactor
+            .query()
+            .to(self.state.current_lp_farm_address())
+            .typed(farm_with_locked_rewards_proxy::FarmProxy)
+            .energy_factory_address()
+            .returns(ReturnsResultUnmanaged)
+            .run()
+            .await;
+        assert_eq!(
+            result,
+            self.state.current_energy_factory_address().to_address()
+        );
+    }
+
     pub async fn setup_lp_farm(&mut self) {
+        self.register_farm_token().await;
         self.set_minimum_farming_epochs(MIN_FARMING_EPOCHS).await;
         self.set_penalty_percent(PENALTY_PERCENTAGE).await;
         self.set_active_state_lp().await;
@@ -1292,16 +1426,16 @@ impl ContractInteract {
         self.set_boosted_yields_factors_lp().await;
     }
 
-    pub async fn setup_farm_staking(&mut self, token_id: String) {
+    pub async fn setup_farm_staking(&mut self) {
+        self.register_farm_token_farm_staking().await;
         self.set_energy_factory_address_farm_staking().await;
-        self.set_farm_token_farm_staking(token_id).await;
         self.set_state_active_farm_staking().await;
         self.set_per_block_rewards_farm_staking().await;
         self.set_produce_rewards_enabled_farm_staking().await;
         self.set_boosted_yields_factors_farm_staking().await;
     }
 
-    pub async fn setup_tests(&mut self) -> (String, String) {
+    pub async fn setup_tests(&mut self) -> String {
         let farm_amount = 100_000_000u64;
         let WEGLD = self
             .issue_fungible_token(
@@ -1339,31 +1473,24 @@ impl ContractInteract {
                 18,
             )
             .await;
-        let STAKING_FARM = self
-            .issue_fungible_token(
-                self.wallet_address.clone(),
-                "StakingFarm".as_bytes(),
-                "STKF".as_bytes(),
-                RustBigUint::from(1000u64),
-                18,
-            )
-            .await;
         self.deploy_energy_factory_mock().await;
+        self.deploy_energy_factory().await;
+        self.issue_locked_token().await;
         self.deploy_pair(WEGLD.clone(), RIDE.clone(), LP.clone())
             .await;
         self.deploy_farm_with_locked_rewards(LP.clone(), MEX.clone())
             .await;
-        self.register_farm_token().await;
+        self.setup_lp_farm().await;
         let LP_FARM = self.get_farm_token_id().await;
         self.set_special_roles_lp_farm(LP.clone(), RIDE.clone())
             .await;
-        self.setup_lp_farm().await;
         self.deploy_farm_staking(RIDE.clone()).await;
-        self.setup_farm_staking(STAKING_FARM.clone()).await;
+        self.setup_farm_staking().await;
+        let STAKING_FARM = self.get_farm_token_id_staking().await;
         self.deploy_metastaking(
             RIDE.clone(),
             LP.clone(),
-            STAKING_FARM.clone(),
+            STAKING_FARM.to_string(),
             LP_FARM.to_string(),
         )
         .await;
@@ -1373,7 +1500,7 @@ impl ContractInteract {
             .await;
         self.set_permissions_hub_address().await;
 
-        (LP, LP_FARM.to_string())
+        LP
     }
     pub async fn set_boosted_yields_rewards_percentage(&mut self, percentage_wanted: u64) {
         let response = self

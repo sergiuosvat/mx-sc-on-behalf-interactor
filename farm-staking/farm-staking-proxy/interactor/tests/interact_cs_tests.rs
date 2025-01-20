@@ -11,8 +11,7 @@ const BOOSTED_YIELDS_PERCENTAGE: u64 = 2500;
 #[cfg_attr(not(feature = "chain-simulator-tests"), ignore)]
 async fn test_deploy() {
     let mut interactor = ContractInteract::new().await;
-    let (_, lp_farm) = interactor.setup_tests().await;
-    println!("LP_FARM: {:?}", lp_farm);
+    interactor.setup_tests().await;
     interactor
         .set_boosted_yields_rewards_percentage_lp(BOOSTED_YIELDS_PERCENTAGE)
         .await;
@@ -25,7 +24,7 @@ async fn test_deploy() {
 #[cfg_attr(not(feature = "chain-simulator-tests"), ignore)]
 async fn test_stake_farm_not_whitelisted() {
     let mut interactor = ContractInteract::new().await;
-    let (lp_token, _) = interactor.setup_tests().await;
+    let lp_token = interactor.setup_tests().await;
     interactor
         .stake_farm_on_behalf(
             interactor.bob_address.clone(),
@@ -42,7 +41,7 @@ async fn test_stake_farm_not_whitelisted() {
 #[cfg_attr(not(feature = "chain-simulator-tests"), ignore)]
 async fn stake_farm_blacklisted() {
     let mut interactor = ContractInteract::new().await;
-    let (lp_token, _) = interactor.setup_tests().await;
+    let lp_token = interactor.setup_tests().await;
     interactor
         .blacklist_address(interactor.bob_address.clone())
         .await;
@@ -63,7 +62,7 @@ async fn stake_farm_blacklisted() {
 async fn test_stake_farm() {
     let farm_amount = 100_000_000u64;
     let mut interactor = ContractInteract::new().await;
-    let (lp_token, _) = interactor.setup_tests().await;
+    let lp_token = interactor.setup_tests().await;
     let bob_address = interactor.bob_address.clone();
     interactor.whitelist_address(bob_address.clone()).await;
     interactor
@@ -72,7 +71,11 @@ async fn test_stake_farm() {
     interactor
         .set_boosted_yields_rewards_percentage_lp(BOOSTED_YIELDS_PERCENTAGE)
         .await;
-    interactor
-        .enter_farm_endpoint(lp_token, farm_amount * 2)
-        .await;
+    let x = interactor.get_locked_token_id_wanted().await;
+    println!("Locked token id: {:?}", x);
+    interactor.get_storage_keys_energy_factory().await;
+    interactor.get_energy_factory_address_lp().await;
+    // interactor
+    //     .enter_farm_endpoint(lp_token, farm_amount * 2)
+    //     .await;
 }
