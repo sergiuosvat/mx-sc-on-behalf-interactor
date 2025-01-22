@@ -6,9 +6,9 @@
 
 // Init:                                 1
 // Upgrade:                              1
-// Endpoints:                           29
+// Endpoints:                           30
 // Async Callback (empty):               1
-// Total number of exported functions:  32
+// Total number of exported functions:  33
 
 #![no_std]
 
@@ -44,6 +44,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         changeFeesCollectorAddress => change_fees_collector_address
         getFeesCollectorAddress => fees_collector_address
         setEnergyFactoryAddress => set_energy_factory_address
+        getLockedTokenIdTest => get_locked_token_id
         getEnergyFactoryAddress => energy_factory_address
         addAdmin => add_admin_endpoint
         removeAdmin => remove_admin_endpoint

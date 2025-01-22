@@ -6,9 +6,9 @@
 
 // Init:                                 1
 // Upgrade:                              1
-// Endpoints:                           20
+// Endpoints:                           21
 // Async Callback:                       1
-// Total number of exported functions:  23
+// Total number of exported functions:  24
 
 #![no_std]
 
@@ -31,6 +31,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         getLpFarmTokenId => lp_farm_token_id
         setPermissionsHubAddress => set_permissions_hub_address
         setEnergyFactoryAddress => set_energy_factory_address
+        getLockedTokenIdTest => get_locked_token_id
         getEnergyFactoryAddress => energy_factory_address
         addSCAddressToWhitelist => add_sc_address_to_whitelist
         removeSCAddressFromWhitelist => remove_sc_address_from_whitelist

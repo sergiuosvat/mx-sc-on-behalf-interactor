@@ -222,6 +222,15 @@ where
             .original_result()
     }
 
+    pub fn get_locked_token_id(
+        self,
+    ) -> TxTypedCall<Env, From, To, NotPayable, Gas, TokenIdentifier<Env::Api>> {
+        self.wrapped_tx
+            .payment(NotPayable)
+            .raw_call("getLockedTokenIdTest")
+            .original_result()
+    }
+
     pub fn energy_factory_address(
         self,
     ) -> TxTypedCall<Env, From, To, NotPayable, Gas, ManagedAddress<Env::Api>> {

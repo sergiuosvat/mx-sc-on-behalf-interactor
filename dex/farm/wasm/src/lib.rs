@@ -6,9 +6,9 @@
 
 // Init:                                 1
 // Upgrade:                              1
-// Endpoints:                           66
+// Endpoints:                           67
 // Async Callback:                       1
-// Total number of exported functions:  69
+// Total number of exported functions:  70
 
 #![no_std]
 
@@ -85,6 +85,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         updateEnergyForUser => update_energy_for_user
         getCurrentClaimProgress => current_claim_progress
         setEnergyFactoryAddress => set_energy_factory_address
+        getLockedTokenIdTest => get_locked_token_id
         getEnergyFactoryAddress => energy_factory_address
     )
 }

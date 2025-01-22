@@ -6,9 +6,9 @@
 
 // Init:                                 1
 // Upgrade:                              1
-// Endpoints:                           19
+// Endpoints:                           20
 // Async Callback (empty):               1
-// Total number of exported functions:  22
+// Total number of exported functions:  23
 
 #![no_std]
 
@@ -38,6 +38,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         unsetTransferRoleLockedFarmToken => unset_transfer_role_locked_farm_token
         getExtendedAttributesActivationNonce => extended_attributes_activation_nonce
         setEnergyFactoryAddress => set_energy_factory_address
+        getLockedTokenIdTest => get_locked_token_id
         getEnergyFactoryAddress => energy_factory_address
     )
 }
