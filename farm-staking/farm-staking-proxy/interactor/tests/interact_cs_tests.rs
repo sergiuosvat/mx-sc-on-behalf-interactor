@@ -9,9 +9,26 @@ use multiversx_sc_snippets::imports::*;
 
 #[tokio::test]
 #[cfg_attr(not(feature = "chain-simulator-tests"), ignore)]
-async fn test_deploy() {
+async fn setup_state() {
     let mut interactor = ContractInteract::new().await;
-    interactor.setup_tests().await;
+    interactor.set_state().await;
+    interactor.set_addresses().await;
+}
+
+#[tokio::test]
+#[cfg_attr(not(feature = "chain-simulator-tests"), ignore)]
+async fn test() {
+    let mut interactor = ContractInteract::new().await;
+    interactor.set_state().await;
+    interactor.set_addresses().await;
+    interactor
+        .send_tokens_to_other_wallet(
+            interactor.bob_address.clone(),
+            String::from("WEGLD-bd4d79"),
+            100000u64,
+        )
+        .await;
+    interactor.debug().await;
 }
 
 // #[tokio::test]

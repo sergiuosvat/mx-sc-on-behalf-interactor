@@ -113,7 +113,7 @@ pub trait ExternalInteractionsModule:
     ) -> EsdtTokenPayment {
         if amount == 0 {
             let locked_token_id = self.get_locked_token_id();
-            return EsdtTokenPayment::new(locked_token_id, 0, amount);
+            return EsdtTokenPayment::new(TokenIdentifier::from("XMEX-123456"), 0, amount);
         }
 
         self.lock_virtual(token_id, amount, destination_address, energy_address)

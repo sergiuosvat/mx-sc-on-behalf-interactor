@@ -79,7 +79,7 @@ pub trait ProxyDexImpl:
         token_ticker: ManagedBuffer,
         num_decimals: usize,
     ) {
-        let register_cost = self.call_value().egld_value().clone_value();
+        let register_cost = self.call_value().egld().clone_value();
         self.wrapped_lp_token().issue_and_set_all_roles(
             EsdtTokenType::Meta,
             register_cost,
@@ -90,20 +90,20 @@ pub trait ProxyDexImpl:
         );
     }
 
-    #[only_owner]
-    #[endpoint(setTransferRoleWrappedLpToken)]
-    fn set_transfer_role_wrapped_lp_token(&self, opt_address: OptionalValue<ManagedAddress>) {
-        let address = match opt_address {
-            OptionalValue::Some(addr) => addr,
-            OptionalValue::None => self.blockchain().get_sc_address(),
-        };
+    // #[only_owner]
+    // #[endpoint(setTransferRoleWrappedLpToken)]
+    // fn set_transfer_role_wrapped_lp_token(&self, opt_address: OptionalValue<ManagedAddress>) {
+    //     let address = match opt_address {
+    //         OptionalValue::Some(addr) => addr,
+    //         OptionalValue::None => self.blockchain().get_sc_address(),
+    //     };
 
-        self.wrapped_lp_token().set_local_roles_for_address(
-            &address,
-            &[EsdtLocalRole::Transfer],
-            None,
-        );
-    }
+    //     self.wrapped_lp_token().set_local_roles_for_address(
+    //         &address,
+    //         &[EsdtLocalRole::Transfer],
+    //         None,
+    //     );
+    // }
 
     #[only_owner]
     #[payable("EGLD")]
@@ -114,7 +114,7 @@ pub trait ProxyDexImpl:
         token_ticker: ManagedBuffer,
         num_decimals: usize,
     ) {
-        let register_cost = self.call_value().egld_value().clone_value();
+        let register_cost = self.call_value().egld().clone_value();
         self.wrapped_farm_token().issue_and_set_all_roles(
             EsdtTokenType::Meta,
             register_cost,
@@ -125,18 +125,18 @@ pub trait ProxyDexImpl:
         );
     }
 
-    #[only_owner]
-    #[endpoint(setTransferRoleWrappedFarmToken)]
-    fn set_transfer_role_wrapped_farm_token(&self, opt_address: OptionalValue<ManagedAddress>) {
-        let address = match opt_address {
-            OptionalValue::Some(addr) => addr,
-            OptionalValue::None => self.blockchain().get_sc_address(),
-        };
+    // #[only_owner]
+    // #[endpoint(setTransferRoleWrappedFarmToken)]
+    // fn set_transfer_role_wrapped_farm_token(&self, opt_address: OptionalValue<ManagedAddress>) {
+    //     let address = match opt_address {
+    //         OptionalValue::Some(addr) => addr,
+    //         OptionalValue::None => self.blockchain().get_sc_address(),
+    //     };
 
-        self.wrapped_farm_token().set_local_roles_for_address(
-            &address,
-            &[EsdtLocalRole::Transfer],
-            None,
-        );
-    }
+    //     self.wrapped_farm_token().set_local_roles_for_address(
+    //         &address,
+    //         &[EsdtLocalRole::Transfer],
+    //         None,
+    //     );
+    // }
 }

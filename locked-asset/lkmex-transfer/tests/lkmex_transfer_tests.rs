@@ -61,11 +61,11 @@ fn transfer_locked_token_test() {
         })
         .assert_ok();
 
-    b_mock.set_esdt_local_roles(
-        transfer_sc_wrapper.address_ref(),
-        LOCKED_TOKEN_ID,
-        &[EsdtLocalRole::Transfer],
-    );
+    // b_mock.set_esdt_local_roles(
+    //     transfer_sc_wrapper.address_ref(),
+    //     LOCKED_TOKEN_ID,
+    //     &[EsdtLocalRole::Transfer],
+    // );
 
     // setup energy factory SC
     b_mock
@@ -104,7 +104,6 @@ fn transfer_locked_token_test() {
             EsdtLocalRole::NftCreate,
             EsdtLocalRole::NftAddQuantity,
             EsdtLocalRole::NftBurn,
-            EsdtLocalRole::Transfer,
         ],
     );
     b_mock.set_esdt_local_roles(
@@ -243,11 +242,11 @@ fn transfer_cooldowns_test() {
         })
         .assert_ok();
 
-    b_mock.set_esdt_local_roles(
-        transfer_sc_wrapper.address_ref(),
-        LOCKED_TOKEN_ID,
-        &[EsdtLocalRole::Transfer],
-    );
+    // b_mock.set_esdt_local_roles(
+    //     transfer_sc_wrapper.address_ref(),
+    //     LOCKED_TOKEN_ID,
+    //     &[EsdtLocalRole::Transfer],
+    // );
 
     // setup energy factory SC
     b_mock
@@ -286,7 +285,6 @@ fn transfer_cooldowns_test() {
             EsdtLocalRole::NftCreate,
             EsdtLocalRole::NftAddQuantity,
             EsdtLocalRole::NftBurn,
-            EsdtLocalRole::Transfer,
         ],
     );
     b_mock.set_esdt_local_roles(
@@ -482,11 +480,11 @@ fn cancel_transfer_test() {
         })
         .assert_ok();
 
-    b_mock.set_esdt_local_roles(
-        transfer_sc_wrapper.address_ref(),
-        LOCKED_TOKEN_ID,
-        &[EsdtLocalRole::Transfer],
-    );
+    // b_mock.set_esdt_local_roles(
+    //     transfer_sc_wrapper.address_ref(),
+    //     LOCKED_TOKEN_ID,
+    //     &[EsdtLocalRole::Transfer],
+    // );
 
     // setup energy factory SC
     b_mock
@@ -525,7 +523,6 @@ fn cancel_transfer_test() {
             EsdtLocalRole::NftCreate,
             EsdtLocalRole::NftAddQuantity,
             EsdtLocalRole::NftBurn,
-            EsdtLocalRole::Transfer,
         ],
     );
     b_mock.set_esdt_local_roles(
@@ -656,11 +653,11 @@ fn transfer_locked_token_after_unlock_period_test() {
         })
         .assert_ok();
 
-    b_mock.set_esdt_local_roles(
-        transfer_sc_wrapper.address_ref(),
-        LOCKED_TOKEN_ID,
-        &[EsdtLocalRole::Transfer],
-    );
+    // b_mock.set_esdt_local_roles(
+    //     transfer_sc_wrapper.address_ref(),
+    //     LOCKED_TOKEN_ID,
+    //     &[EsdtLocalRole::Transfer],
+    // );
 
     // setup energy factory SC
     b_mock
@@ -699,7 +696,6 @@ fn transfer_locked_token_after_unlock_period_test() {
             EsdtLocalRole::NftCreate,
             EsdtLocalRole::NftAddQuantity,
             EsdtLocalRole::NftBurn,
-            EsdtLocalRole::Transfer,
         ],
     );
     b_mock.set_esdt_local_roles(

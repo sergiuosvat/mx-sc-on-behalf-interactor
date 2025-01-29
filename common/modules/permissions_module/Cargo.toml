@@ -11,11 +11,11 @@ edition = "2021"
 path = "src/permissions_module.rs"
 
 [dependencies]
-bitflags = "2.4.1"
+bitflags = "2.8.0"
 
 [dependencies.common_errors]
 path = "../../common_errors"
 
 [dependencies.multiversx-sc]
-version = "=0.55.0"
+version = "=0.56.0"
 features = ["esdt-token-payment-legacy-decode"]

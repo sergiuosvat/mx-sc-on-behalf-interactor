@@ -6,9 +6,9 @@
 
 // Init:                                 1
 // Upgrade:                              1
-// Endpoints:                           20
+// Endpoints:                           17
 // Async Callback (empty):               1
-// Total number of exported functions:  23
+// Total number of exported functions:  20
 
 #![no_std]
 
@@ -32,9 +32,6 @@ multiversx_sc_wasm_adapter::endpoints! {
         addFarmToIntermediate => add_farm_to_intermediate
         removeIntermediatedFarm => remove_intermediated_farm
         exitFarmProxy => exit_farm_proxy
-        setTransferRoleLockedLpToken => set_transfer_role_locked_lp_token
-        unsetTransferRoleLockedLpToken => unset_transfer_role_locked_lp_token
-        setTransferRoleLockedFarmToken => set_transfer_role_locked_farm_token
         unsetTransferRoleLockedFarmToken => unset_transfer_role_locked_farm_token
         getExtendedAttributesActivationNonce => extended_attributes_activation_nonce
         setEnergyFactoryAddress => set_energy_factory_address

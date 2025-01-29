@@ -85,7 +85,6 @@ where
                 EsdtLocalRole::NftCreate,
                 EsdtLocalRole::NftAddQuantity,
                 EsdtLocalRole::NftBurn,
-                EsdtLocalRole::Transfer,
             ],
         );
 

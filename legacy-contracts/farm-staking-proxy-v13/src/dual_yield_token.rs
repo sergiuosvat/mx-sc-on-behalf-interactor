@@ -1,7 +1,8 @@
 multiversx_sc::imports!();
 multiversx_sc::derive_imports!();
 
-#[derive(TypeAbi, TopEncode, TopDecode, PartialEq, Debug)]
+#[type_abi]
+#[derive(TopEncode, TopDecode, PartialEq, Debug)]
 pub struct DualYieldTokenAttributes<M: ManagedTypeApi> {
     pub lp_farm_token_nonce: u64,
     pub lp_farm_token_amount: BigUint<M>,
@@ -20,18 +21,18 @@ impl<M: ManagedTypeApi> DualYieldTokenAttributes<M> {
 
 #[multiversx_sc::module]
 pub trait DualYieldTokenModule: token_merge_helper::TokenMergeHelperModule {
-    #[only_owner]
-    #[endpoint(setTransferRoleDualYieldToken)]
-    fn set_transfer_role_dual_yield_token(&self, opt_address: OptionalValue<ManagedAddress>) {
-        let address = self.resolve_address(opt_address);
-        let token_id = self.dual_yield_token_id().get();
-        let roles = [EsdtLocalRole::Transfer];
+    // #[only_owner]
+    // #[endpoint(setTransferRoleDualYieldToken)]
+    // fn set_transfer_role_dual_yield_token(&self, opt_address: OptionalValue<ManagedAddress>) {
+    //     let address = self.resolve_address(opt_address);
+    //     let token_id = self.dual_yield_token_id().get();
+    //     let roles = [EsdtLocalRole::Transfer];
 
-        self.send()
-            .esdt_system_sc_proxy()
-            .set_special_roles(&address, &token_id, roles.iter().cloned())
-            .async_call_and_exit()
-    }
+    //     self.send()
+    //         .esdt_system_sc_proxy()
+    //         .set_special_roles(&address, &token_id, roles.iter().cloned())
+    //         .async_call_and_exit()
+    // }
 
     fn resolve_address(&self, opt_address: OptionalValue<ManagedAddress>) -> ManagedAddress {
         match opt_address {

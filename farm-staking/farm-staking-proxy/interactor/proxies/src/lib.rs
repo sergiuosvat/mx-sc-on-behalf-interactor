@@ -6,3 +6,4 @@ pub mod pair_proxy;
 pub mod permission_hub_proxy;
 pub mod proxy;
 pub mod router_proxy;
+pub mod wegld_swap_proxy;

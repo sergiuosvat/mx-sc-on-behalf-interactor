@@ -139,7 +139,6 @@ where
                 EsdtLocalRole::NftCreate,
                 EsdtLocalRole::NftAddQuantity,
                 EsdtLocalRole::NftBurn,
-                EsdtLocalRole::Transfer,
             ],
         );
         b_mock.set_esdt_local_roles(

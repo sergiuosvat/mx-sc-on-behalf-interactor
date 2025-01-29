@@ -6,9 +6,9 @@
 
 // Init:                                 1
 // Upgrade:                              1
-// Endpoints:                           21
+// Endpoints:                           19
 // Async Callback (empty):               1
-// Total number of exported functions:  24
+// Total number of exported functions:  22
 
 #![no_std]
 
@@ -25,8 +25,6 @@ multiversx_sc_wasm_adapter::endpoints! {
         createAndForwardCustomPeriod => create_and_forward_custom_period
         createAndForward => create_and_forward
         unlockAssets => unlock_assets
-        setTransferRoleForAddress => set_transfer_role_for_address
-        unsetTransferRoleForAddress => unset_transfer_role_for_address
         setBurnRoleForAddress => set_burn_role_for_address
         getLastErrorMessage => last_error_message
         getInitEpoch => init_epoch

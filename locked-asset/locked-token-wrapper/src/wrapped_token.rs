@@ -37,36 +37,36 @@ pub trait WrappedTokenModule:
     }
 
     /// Sets the transfer role for the given address. Defaults to own address.
-    #[only_owner]
-    #[endpoint(setTransferRoleWrappedToken)]
-    fn set_transfer_role(&self, opt_address: OptionalValue<ManagedAddress>) {
-        let address = match opt_address {
-            OptionalValue::Some(addr) => addr,
-            OptionalValue::None => self.blockchain().get_sc_address(),
-        };
+    // #[only_owner]
+    // #[endpoint(setTransferRoleWrappedToken)]
+    // fn set_transfer_role(&self, opt_address: OptionalValue<ManagedAddress>) {
+    //     let address = match opt_address {
+    //         OptionalValue::Some(addr) => addr,
+    //         OptionalValue::None => self.blockchain().get_sc_address(),
+    //     };
 
-        self.wrapped_token().set_local_roles_for_address(
-            &address,
-            &[EsdtLocalRole::Transfer],
-            None,
-        );
-    }
+    //     self.wrapped_token().set_local_roles_for_address(
+    //         &address,
+    //         &[EsdtLocalRole::Transfer],
+    //         None,
+    //     );
+    // }
 
     /// Removes the transfer role for the given address.
-    #[only_owner]
-    #[endpoint(unsetTransferRoleWrappedToken)]
-    fn unset_transfer_role(&self, address: ManagedAddress) {
-        let wrapped_token_id = self.wrapped_token().get_token_id();
-        let system_sc_proxy = ESDTSystemSmartContractProxy::new_proxy_obj();
-        system_sc_proxy
-            .unset_special_roles(
-                &address,
-                &wrapped_token_id,
-                [EsdtLocalRole::Transfer][..].iter().cloned(),
-            )
-            .async_call()
-            .call_and_exit();
-    }
+    // #[only_owner]
+    // #[endpoint(unsetTransferRoleWrappedToken)]
+    // fn unset_transfer_role(&self, address: ManagedAddress) {
+    //     let wrapped_token_id = self.wrapped_token().get_token_id();
+    //     let system_sc_proxy = ESDTSystemSmartContractProxy::new_proxy_obj();
+    //     system_sc_proxy
+    //         .unset_special_roles(
+    //             &address,
+    //             &wrapped_token_id,
+    //             [EsdtLocalRole::Transfer][..].iter().cloned(),
+    //         )
+    //         .async_call()
+    //         .call_and_exit();
+    // }
 
     fn wrap_locked_token_and_send(
         &self,

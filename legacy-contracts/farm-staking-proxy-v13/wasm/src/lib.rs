@@ -6,9 +6,9 @@
 
 // Init:                                 1
 // Upgrade:                              1
-// Endpoints:                            9
+// Endpoints:                            8
 // Async Callback (empty):               1
-// Total number of exported functions:  12
+// Total number of exported functions:  11
 
 #![no_std]
 
@@ -21,7 +21,6 @@ multiversx_sc_wasm_adapter::endpoints! {
         init => init
         upgrade => upgrade
         unstakeFarmTokens => unstake_farm_tokens
-        setTransferRoleDualYieldToken => set_transfer_role_dual_yield_token
         getDualYieldTokenId => dual_yield_token_id
         getLpFarmAddress => lp_farm_address
         getStakingFarmAddress => staking_farm_address

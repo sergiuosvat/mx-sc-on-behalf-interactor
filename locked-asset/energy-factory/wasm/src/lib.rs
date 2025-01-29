@@ -6,9 +6,9 @@
 
 // Init:                                 1
 // Upgrade:                              1
-// Endpoints:                           34
+// Endpoints:                           33
 // Async Callback:                       1
-// Total number of exported functions:  37
+// Total number of exported functions:  36
 
 #![no_std]
 
@@ -44,7 +44,6 @@ multiversx_sc_wasm_adapter::endpoints! {
         pause => pause_endpoint
         unpause => unpause_endpoint
         isPaused => paused_status
-        setTransferRoleLockedToken => set_transfer_role
         setBurnRoleLockedToken => set_burn_role
         mergeTokens => merge_tokens_endpoint
         lockVirtual => lock_virtual
