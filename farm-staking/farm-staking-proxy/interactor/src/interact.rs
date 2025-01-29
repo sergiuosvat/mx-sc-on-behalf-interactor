@@ -1,17 +1,13 @@
 #![allow(non_snake_case)]
 
 mod config;
+mod state;
 use proxies::*;
+use state::State;
 
-use config::Config;
+pub use config::Config;
 use multiversx_sc_snippets::imports::*;
-use serde::{Deserialize, Serialize};
-use std::{
-    io::{Read, Write},
-    path::Path,
-};
 
-const STATE_FILE: &str = "state.toml";
 const PERMISSION_HUB_CONTRACT_CODE: &str =
     "../../dex/permissions-hub/output/permissions-hub.mxsc.json";
 
@@ -52,125 +48,8 @@ pub async fn farm_staking_proxy_cli() {
     //     }
 }
 
-#[derive(Debug, Default, Serialize, Deserialize)]
-pub struct State {
-    contract_address: Option<Bech32Address>,
-    pair_address_egld_mex: Option<Bech32Address>,
-    pair_address_egld_usdc: Option<Bech32Address>,
-    pair_address_egld_utk: Option<Bech32Address>,
-    energy_factory_address: Option<Bech32Address>,
-    farm_address: Option<Bech32Address>,
-    farm_staking_address: Option<Bech32Address>,
-    permission_hub_address: Option<Bech32Address>,
-}
-
-impl State {
-    // Deserializes state from file
-    pub fn load_state() -> Self {
-        if Path::new(STATE_FILE).exists() {
-            let mut file = std::fs::File::open(STATE_FILE).unwrap();
-            let mut content = String::new();
-            file.read_to_string(&mut content).unwrap();
-            toml::from_str(&content).unwrap()
-        } else {
-            Self::default()
-        }
-    }
-
-    /// Sets the contract address
-    pub fn set_address(&mut self, address: Bech32Address) {
-        self.contract_address = Some(address);
-    }
-
-    pub fn set_pair_address_mex(&mut self, address: Bech32Address) {
-        self.pair_address_egld_mex = Some(address);
-    }
-
-    pub fn set_pair_address_usdc(&mut self, address: Bech32Address) {
-        self.pair_address_egld_usdc = Some(address);
-    }
-
-    pub fn set_pair_address_utk(&mut self, address: Bech32Address) {
-        self.pair_address_egld_utk = Some(address);
-    }
-
-    pub fn set_energy_factory_address(&mut self, address: Bech32Address) {
-        self.energy_factory_address = Some(address);
-    }
-
-    pub fn set_farm_address(&mut self, address: Bech32Address) {
-        self.farm_address = Some(address);
-    }
-
-    pub fn set_farm_staking_address(&mut self, address: Bech32Address) {
-        self.farm_staking_address = Some(address);
-    }
-
-    pub fn set_permission_hub_address(&mut self, address: Bech32Address) {
-        self.permission_hub_address = Some(address);
-    }
-
-    /// Returns the contract address
-    pub fn current_address(&self) -> &Bech32Address {
-        self.contract_address
-            .as_ref()
-            .expect("no known contract, deploy first")
-    }
-
-    pub fn current_pair_address_mex(&self) -> &Bech32Address {
-        self.pair_address_egld_mex
-            .as_ref()
-            .expect("no known pair address, deploy first")
-    }
-
-    pub fn current_pair_address_usdc(&self) -> &Bech32Address {
-        self.pair_address_egld_usdc
-            .as_ref()
-            .expect("no known pair address, deploy first")
-    }
-
-    pub fn current_pair_address_utk(&self) -> &Bech32Address {
-        self.pair_address_egld_utk
-            .as_ref()
-            .expect("no known pair address, deploy first")
-    }
-
-    pub fn current_energy_factory_address(&self) -> &Bech32Address {
-        self.energy_factory_address
-            .as_ref()
-            .expect("no known energy factory address, deploy first")
-    }
-
-    pub fn current_farm_address(&self) -> &Bech32Address {
-        self.farm_address
-            .as_ref()
-            .expect("no known lp farm address, deploy first")
-    }
-
-    pub fn current_farm_staking_address(&self) -> &Bech32Address {
-        self.farm_staking_address
-            .as_ref()
-            .expect("no known farm staking address, deploy first")
-    }
-
-    pub fn current_permission_hub_address(&self) -> &Bech32Address {
-        self.permission_hub_address
-            .as_ref()
-            .expect("no known permission hub address, deploy first")
-    }
-}
-
-impl Drop for State {
-    // Serializes state to file
-    fn drop(&mut self) {
-        let mut file = std::fs::File::create(STATE_FILE).unwrap();
-        file.write_all(toml::to_string(self).unwrap().as_bytes())
-            .unwrap();
-    }
-}
-
 pub struct ContractInteract {
-    interactor: Interactor,
+    pub interactor: Interactor,
     pub wallet_address: Address,
     pub bob_address: Address,
     permission_hub_contract_code: String,
@@ -178,19 +57,16 @@ pub struct ContractInteract {
 }
 
 impl ContractInteract {
-    pub async fn new() -> Self {
-        let config = Config::new();
+    pub async fn new(config: Config) -> Self {
         let mut interactor = Interactor::new(config.gateway_uri())
             .await
             .use_chain_simulator(config.use_chain_simulator());
 
-        interactor.set_current_dir_from_workspace("farm-staking/farm-staking-proxy");
+        interactor.set_current_dir_from_workspace("farm-staking/farm-staking-proxy/interactor");
         let wallet_address = interactor.register_wallet(test_wallets::alice()).await;
         let bob_address = interactor.register_wallet(test_wallets::bob()).await;
 
-        // Useful in the chain simulator setting
-        // generate blocks until ESDTSystemSCAddress is enabled
-        interactor.generate_blocks_until_epoch(1).await.unwrap();
+        interactor.generate_blocks(30u64).await.unwrap();
 
         ContractInteract {
             interactor,

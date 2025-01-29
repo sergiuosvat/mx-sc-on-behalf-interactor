@@ -1,0 +1,17 @@
+[
+    {
+        "address": "erd1qyu5wthldzr8wx5c9ucg8kjagg0jfs53s8nr3zpz3hypefsdd8ssycr6th",
+        "nonce": 13849,
+        "balance": "95727067991477072414",
+        "pairs": {
+            "454c524f4e44657364745745474c442d626434643739": "0f4240",
+            "454c524f4e446573647455544b2d326638306539": "0f4240"
+        },
+        "code": "",
+        "code_hash": "",
+        "root_hash": "Zy2b7F7t+M5G+/wiTCDOkzKJIcdjbiqlKV3EMMY/Psc=",
+        "code_metadata": "",
+        "owner_address": "",
+        "developer_reward": "0"
+    }
+]
